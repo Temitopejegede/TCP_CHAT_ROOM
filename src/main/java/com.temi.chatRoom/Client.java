@@ -16,12 +16,21 @@ public class Client implements Runnable{
     @Override
     public void run() {
         try{
-            Socket client = new Socket("127.0.0.1", 9999);
+            client = new Socket("127.0.0.1", 9999);
             out = new PrintWriter(client.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
+            InputHandler inHandler = new InputHandler();
+            Thread t = new Thread(inHandler);
+            t.start();
+
+            String inMessage;
+            while((inMessage = in.readLine()) != null){
+                System.out.println(inMessage);
+            }
         } catch (IOException e){
-            //TODO: handle
+            //TODO: add custom exception for inactive server here
+            shutdown();
         }
     }
 
@@ -34,7 +43,8 @@ public class Client implements Runnable{
                  client.close();
              }
          } catch (IOException e){
-
+             //TODO: make custom exception here
+            e.printStackTrace();
          }
     }
 
@@ -47,6 +57,7 @@ public class Client implements Runnable{
                 while(!done){
                     String message = inReader.readLine();
                     if(message.equals("/quit")){
+                        out.println(message);
                         inReader.close();
                         shutdown();
                     } else {
@@ -57,5 +68,10 @@ public class Client implements Runnable{
                 shutdown();
             }
         }
+    }
+
+    public static void main(String[] args){
+        Client client = new Client();
+        client.run();
     }
 }

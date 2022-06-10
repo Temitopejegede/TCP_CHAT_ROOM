@@ -54,6 +54,7 @@ public class Server implements Runnable {
 
     public void shutDown() throws Exception {
         done = true;
+        pool.shutdown();
         if(!server.isClosed()){
             server.close();
         }
@@ -77,10 +78,10 @@ public class Server implements Runnable {
             try{
               out = new PrintWriter(client.getOutputStream(), true);
               in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-              out.println("Please enter a nickname");
+              out.println("Please enter a nickname: ");
               nickname = in.readLine();
               //add functionality to make sure that it is a valid string and not null
-                System.out.println(nickname + "connected!");
+                System.out.println(nickname + " connected!");
                 broadcast(nickname + " joined the chat");
 
                 String message;
@@ -96,7 +97,8 @@ public class Server implements Runnable {
                             out.println("No nickname was provided");
                         }
                     } else if(message.startsWith("/quit")){
-                        broadcast(nickname + " left the chat");
+                        broadcast(nickname + " left the chat ):");
+                        System.out.println(nickname + " just left the chat ):");
                         shutDownIndividualConnection();
                     } else{
                         broadcast(nickname + ": " +message);

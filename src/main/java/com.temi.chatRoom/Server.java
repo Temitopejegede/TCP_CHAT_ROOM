@@ -11,19 +11,31 @@ import java.util.ArrayList;
 public class Server implements Runnable {
 
     private ArrayList<ConnectionHandler> connections;
+    private ServerSocket server;
+    private boolean done;
 
     public Server(){
         connections = new ArrayList<>();
+        done = false;
     }
+
     @Override
     public void run(){
         try {
-            ServerSocket server = new ServerSocket( 9999);
-            Socket client = server.accept();
-            ConnectionHandler handler = new ConnectionHandler(client);
-            connections.add(handler);
+
+            server = new ServerSocket( 9999);
+            while(!done){
+                Socket client = server.accept();
+                ConnectionHandler handler = new ConnectionHandler(client);
+                connections.add(handler);
+            }
+
         } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                shutDown();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -32,6 +44,16 @@ public class Server implements Runnable {
             if(ch != null){
                 ch.sendMessage(message);
             }
+        }
+    }
+
+    public void shutDown() throws IOException {
+        done = true;
+        if(!server.isClosed()){
+            server.close();
+        }
+        for(ConnectionHandler ch: connections){
+            ch.shutDownIndividualConnection();
         }
     }
 
@@ -69,19 +91,32 @@ public class Server implements Runnable {
                             out.println("No nickname was provided");
                         }
                     } else if(message.startsWith("/quit")){
-                        //TODO: quit
+                        broadcast(nickname + " left the chat");
+                        shutDownIndividualConnection();
                     } else{
                         broadcast(nickname + ": " +message);
                     }
                 }
             }
             catch (IOException e){
-
+                try {
+                    shutDown();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
 
         public void sendMessage(String message){
             out.println(message);
+        }
+
+        public void shutDownIndividualConnection() throws IOException {
+            in.close();
+            out.close();
+            if(!client.isClosed()){
+                client.close();
+            }
         }
     }
 }

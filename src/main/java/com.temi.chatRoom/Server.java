@@ -35,10 +35,10 @@ public class Server implements Runnable {
                 pool.execute(handler);
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             try {
                 shutDown();
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
@@ -52,7 +52,7 @@ public class Server implements Runnable {
         }
     }
 
-    public void shutDown() throws IOException {
+    public void shutDown() throws Exception {
         done = true;
         if(!server.isClosed()){
             server.close();
@@ -106,7 +106,7 @@ public class Server implements Runnable {
             catch (IOException e){
                 try {
                     shutDown();
-                } catch (IOException ex) {
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
